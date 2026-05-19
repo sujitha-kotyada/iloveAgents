@@ -9,10 +9,10 @@ const databaseQueryOptimizer = {
   model: 'gpt-4o',
   exampleInputs: {
     sql_query:
-      'SELECT * FROM orders o JOIN users u ON o.user_id = u.id WHERE YEAR(o.created_at) = 2024 ORDER BY o.total DESC LIMIT 50 OFFSET 5000;',
+      'SELECT c.id, c.email, (SELECT COUNT(*) FROM support_tickets t WHERE t.customer_id = c.id AND t.status != "closed") AS open_tickets FROM customers c WHERE LOWER(c.region) = "west" ORDER BY c.created_at DESC;',
     schema_context:
-      'CREATE TABLE products (id UUID PRIMARY KEY, sku TEXT, price NUMERIC, updated_at TIMESTAMP);\nCREATE TABLE inventory (product_id UUID, warehouse_id UUID, quantity INT);',
-    dialect: 'BigQuery',
+      'CREATE TABLE customers (id INT PRIMARY KEY, email VARCHAR(255), region VARCHAR(100), created_at DATETIME);\nCREATE TABLE support_tickets (id INT PRIMARY KEY, customer_id INT, status VARCHAR(50), created_at DATETIME);',
+    dialect: 'MySQL',
   },
   inputs: [
     {
