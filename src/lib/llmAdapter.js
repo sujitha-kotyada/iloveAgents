@@ -187,35 +187,44 @@ const PROVIDER_CONFIGS = {
 }
 
 const ERROR_MESSAGES = {
-  401: 'Invalid API key. Please check your key and try again.',
+  401: 'invalid_api_key', // We'll use a key to help downstream logic
   403: 'Access forbidden. Your API key may not have the required permissions.',
   429: 'Rate limit hit. Wait a moment and try again.',
   500: 'The API server encountered an error. Try again shortly.',
   502: 'Bad gateway — the API is temporarily unavailable.',
   503: 'The API service is temporarily unavailable. Try again in a minute.',
-}
+};
 
 /**
  * Handle non-OK HTTP responses consistently.
  */
-async function handleErrorResponse(response) {
-  const friendlyMessage =
-    ERROR_MESSAGES[response.status] ||
-    `API returned status ${response.status}. Please check your configuration.`
-
-  let detail = ''
+async function handleErrorResponse(response, provider = "unknown") {
+  const errorKey = ERROR_MESSAGES[response.status] || null;
+  let detail = '';
   try {
-    const errBody = await response.json()
-    detail = errBody?.error?.message || JSON.stringify(errBody)
+    const errBody = await response.json();
+    detail = errBody?.error?.message || JSON.stringify(errBody);
   } catch {
     // Could not parse error body
   }
 
+  if (errorKey === 'invalid_api_key') {
+    throw {
+      type: "invalid_api_key",
+      provider,
+      detail: detail || 'No additional details',
+    };
+  }
+
+  const friendlyMessage =
+    typeof ERROR_MESSAGES[response.status] === 'string'
+      ? ERROR_MESSAGES[response.status]
+      : `API returned status ${response.status}. Please check your configuration.`;
+
   throw new Error(
     detail ? `${friendlyMessage}\n\nDetails: ${detail}` : friendlyMessage
-  )
+  );
 }
-
 /**
  * Run an agent against the specified LLM provider (one-shot, non-streaming).
  *
@@ -256,7 +265,7 @@ export async function runAgent({ provider, model, apiKey, systemPrompt, userMess
     })
 
     if (!response.ok) {
-      await handleErrorResponse(response)
+      await handleErrorResponse(response, provider)
     }
 
     const data = await response.json()
