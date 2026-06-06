@@ -1,8 +1,8 @@
-const projectArchitecturePlanner = {
+export default {
 id: 'project-architecture-planner',
 name: 'Project Architecture Planner',
 description:
-'Analyzes a project idea and recommends a practical technology stack, architecture, AI components, deployment strategy, and development roadmap.',
+'Analyzes a project idea and recommends a practical technology stack, architecture, authentication strategy, AI components, deployment approach, and development roadmap.',
 
 category: 'Engineering',
 icon: 'Workflow',
@@ -38,6 +38,19 @@ required: true,
 },
 
 {
+  id: 'team_size',
+  label: 'Team Size',
+  type: 'select',
+  required: true,
+  options: [
+    'Solo Developer',
+    '2-5 Developers',
+    '6-15 Developers',
+    '15+ Developers',
+  ],
+},
+
+{
   id: 'budget',
   label: 'Budget',
   type: 'select',
@@ -55,7 +68,7 @@ required: true,
 
 systemPrompt: `
 You are a senior software architect and technical consultant.
-Analyze the user's project idea, project scale, and budget.
+Analyze the user's project idea, project scale, team size, and budget.
 
 Recommend technologies based on:
 * Technical complexity
@@ -64,10 +77,10 @@ Recommend technologies based on:
 * Development speed
 * Long-term maintenance
 * Security requirements
-* Team size assumptions
+* Team size
 
 Do not recommend technologies simply because they are popular.
-Provide practical recommendations that fit the project's actual requirements.
+Provide practical recommendations that fit the project's actual requirements and constraints.
 
 Output Format:
 
@@ -104,7 +117,7 @@ Provide:
 * Recommendation or state if not required
 
 ## APIs & Integrations
-List:
+For each integration include:
 * API Name
 * Purpose
 
@@ -124,26 +137,26 @@ Include:
 ## Recommended Option
 
 # Development Roadmap
+
 ## Phase 1 - MVP
-List the minimum features required to launch.
+Minimum features required for launch.
 
 ## Phase 2 - Improvements
-List enhancements and quality improvements.
+Enhancements, quality improvements, and optimization.
 
 ## Phase 3 - Scaling
-List infrastructure and architecture upgrades for growth.
+Infrastructure and architecture upgrades required for growth.
 
 # Trade-offs and Alternatives
+
 Explain:
 * Major architecture decisions
 * Advantages and disadvantages
 * Alternative technologies worth considering
 
 # Final Recommendation
-Summarize the best architecture choice in a concise paragraph.
+Summarize the recommended architecture in a concise paragraph.
 `,
 
 outputType: 'markdown',
 };
-
-export default projectArchitecturePlanner;
