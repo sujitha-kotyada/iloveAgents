@@ -2,7 +2,7 @@ export const suites = [
   {
     id: 'developer',
     name: 'Developer Suite',
-    emoji: '💻',
+    icon: 'Code2',
     description: 'Everything you need to write, review, and ship better code',
     color: '#6366f1',
     agents: [
@@ -58,7 +58,7 @@ export const suites = [
   {
     id: 'data-ai',
     name: 'Data & AI Suite',
-    emoji: '📊',
+    icon: 'BarChart3',
     description: 'Build, analyze, and optimize your data pipelines and ML models',
     color: '#0ea5e9',
     agents: [
@@ -92,7 +92,7 @@ export const suites = [
   {
     id: 'marketing',
     name: 'Marketing & Growth Suite',
-    emoji: '📈',
+    icon: 'TrendingUp',
     description: 'Create content, grow your audience, and drive more traffic',
     color: '#f59e0b',
     agents: [
@@ -123,7 +123,7 @@ export const suites = [
   {
     id: 'sales',
     name: 'Sales Suite',
-    emoji: '💰',
+    icon: 'DollarSign',
     description: 'Close more deals with better outreach, scripts, and analysis',
     color: '#10b981',
     agents: [
@@ -153,7 +153,7 @@ export const suites = [
   {
     id: 'design-creative',
     name: 'Design & Creative Suite',
-    emoji: '🎨',
+    icon: 'Palette',
     description: 'Design better products, generate worlds, and build stunning UIs',
     color: '#ec4899',
     agents: [
@@ -181,7 +181,7 @@ export const suites = [
   {
     id: 'content-writing',
     name: 'Content & Writing Suite',
-    emoji: '📝',
+    icon: 'PenLine',
     description: 'Write proposals, documents, and content that gets results',
     color: '#8b5cf6',
     agents: [
@@ -212,7 +212,7 @@ export const suites = [
   {
     id: 'learning-career',
     name: 'Learning & Career Suite',
-    emoji: '🎓',
+    icon: 'GraduationCap',
     description: 'Learn faster, grow your career, and land your dream job',
     color: '#f97316',
     agents: [
@@ -243,7 +243,7 @@ export const suites = [
   {
     id: 'business',
     name: 'Business Suite',
-    emoji: '🏢',
+    icon: 'Briefcase',
     description: 'Run your business smarter with legal, finance, and operations tools',
     color: '#64748b',
     agents: [
@@ -277,7 +277,7 @@ export const suites = [
   {
     id: 'health',
     name: 'Health & Wellness Suite',
-    emoji: '🏥',
+    icon: 'HeartPulse',
     description: 'Tools for healthcare professionals and personal wellness',
     color: '#ef4444',
     agents: [
@@ -302,7 +302,7 @@ export const suites = [
   {
     id: 'security-web3',
     name: 'Security & Web3 Suite',
-    emoji: '🔐',
+    icon: 'ShieldCheck',
     description: 'Audit smart contracts, detect threats, and build on Web3',
     color: '#14b8a6',
     agents: [
@@ -328,7 +328,7 @@ export const suites = [
   {
     id: 'gaming',
     name: 'Gaming & Fun Suite',
-    emoji: '🎮',
+    icon: 'Gamepad2',
     description: 'Build game worlds, check compatibility, and explore your future',
     color: '#a855f7',
     agents: [

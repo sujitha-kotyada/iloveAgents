@@ -1,9 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Sparkles, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight, Code2, BarChart3, TrendingUp, DollarSign, Palette, PenLine, GraduationCap, Briefcase, HeartPulse, ShieldCheck, Gamepad2 } from 'lucide-react'
 import { suites } from '../suites/suitesData'
 import SuiteWizard from '../components/SuiteWizard'
 import { useDocumentTitle } from '../lib/useDocumentTitle'
+
+// Map icon name string → Lucide component
+const SUITE_ICONS = {
+  Code2, BarChart3, TrendingUp, DollarSign, Palette,
+  PenLine, GraduationCap, Briefcase, HeartPulse, ShieldCheck, Gamepad2,
+}
 
 /**
  * SuitesPage
@@ -71,6 +77,7 @@ export default function SuitesPage() {
 
 // ── Suite card
 function SuiteCard({ suite, onSelect }) {
+  const IconComponent = SUITE_ICONS[suite.icon] || Code2
   return (
     <div
       className="rounded-xl border p-5 flex flex-col gap-3 transition-all duration-200
@@ -78,11 +85,14 @@ function SuiteCard({ suite, onSelect }) {
         hover:shadow-md hover:-translate-y-0.5"
       style={{ borderTopColor: suite.color, borderTopWidth: 3 }}
     >
-      {/* Emoji + name */}
-      <div className="flex items-center gap-2">
-        <span className="text-2xl" role="img" aria-label={suite.name}>
-          {suite.emoji}
-        </span>
+      {/* Icon + name */}
+      <div className="flex items-center gap-2.5">
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: suite.color + '20' }}
+        >
+          <IconComponent size={17} style={{ color: suite.color }} />
+        </div>
         <h2 className="text-base font-bold dark:text-text-primary text-gray-900 leading-tight">
           {suite.name}
         </h2>

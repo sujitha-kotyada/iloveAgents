@@ -1,7 +1,17 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, SkipForward, Sparkles } from 'lucide-react'
+import {
+  ArrowLeft, ArrowRight, SkipForward, Sparkles,
+  Code2, BarChart3, TrendingUp, DollarSign, Palette,
+  PenLine, GraduationCap, Briefcase, HeartPulse, ShieldCheck, Gamepad2,
+} from 'lucide-react'
 import { useAgents } from '../lib/useAgents'
+
+// Map icon name string → Lucide component
+const SUITE_ICONS = {
+  Code2, BarChart3, TrendingUp, DollarSign, Palette,
+  PenLine, GraduationCap, Briefcase, HeartPulse, ShieldCheck, Gamepad2,
+}
 
 /**
  * SuiteWizard
@@ -94,6 +104,7 @@ export default function SuiteWizard({ suite, onBack }) {
   if (showResults) {
     const matched = rankedAgents.filter((r) => r.pct > 0)
     const unmatched = rankedAgents.filter((r) => r.pct === 0)
+    const SuiteIcon = SUITE_ICONS[suite.icon] || Code2
 
     return (
       <div className="animate-fade-in">
@@ -107,15 +118,18 @@ export default function SuiteWizard({ suite, onBack }) {
           >
             <ArrowLeft size={16} />
           </button>
-          <div>
-            <h2 className="text-lg font-bold dark:text-text-primary text-gray-900">
-              {suite.emoji} {suite.name}
-            </h2>
-            <p className="text-xs dark:text-text-muted text-gray-400">
-              {answeredCount > 0
-                ? `Recommended based on your answers`
-                : 'All agents in this suite'}
-            </p>
+          <div className="flex items-center gap-2">
+            <SuiteIcon size={18} style={{ color: suite.color }} />
+            <div>
+              <h2 className="text-lg font-bold dark:text-text-primary text-gray-900">
+                {suite.name}
+              </h2>
+              <p className="text-xs dark:text-text-muted text-gray-400">
+                {answeredCount > 0
+                  ? `Recommended based on your answers`
+                  : 'All agents in this suite'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -183,6 +197,7 @@ export default function SuiteWizard({ suite, onBack }) {
   // ─────────────────────────────────────────────────────
   const question = questions[step]
   const progress = questions.length > 0 ? ((step) / questions.length) * 100 : 0
+  const SuiteIcon = SUITE_ICONS[suite.icon] || Code2
 
   return (
     <div className="max-w-xl mx-auto animate-fade-in">
@@ -196,13 +211,16 @@ export default function SuiteWizard({ suite, onBack }) {
         >
           <ArrowLeft size={16} />
         </button>
-        <div>
-          <h2 className="text-base font-bold dark:text-text-primary text-gray-900">
-            {suite.emoji} {suite.name}
-          </h2>
-          <p className="text-xs dark:text-text-muted text-gray-400">
-            Question {step + 1} of {questions.length}
-          </p>
+        <div className="flex items-center gap-2">
+          <SuiteIcon size={16} style={{ color: suite.color }} />
+          <div>
+            <h2 className="text-base font-bold dark:text-text-primary text-gray-900">
+              {suite.name}
+            </h2>
+            <p className="text-xs dark:text-text-muted text-gray-400">
+              Question {step + 1} of {questions.length}
+            </p>
+          </div>
         </div>
       </div>
 
