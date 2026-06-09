@@ -6,7 +6,7 @@ export default {
   name: "Disaster Recovery Plan Generator",
 
   description:
-    "Generate complete disaster recovery plans with RTO/RPO targets, backup strategies, failover procedures, and testing schedules.",
+    "Generate a complete disaster recovery plan with RTO/RPO targets, backup strategies, failover procedures, recovery workflows, and testing schedules.",
 
   category: "DevOps",
 
@@ -14,16 +14,24 @@ export default {
 
   provider: "any",
 
-  defaultProvider: "openai",
+  defaultProvider: "anthropic",
 
-  model: "gpt-4o",
+  model: "claude-sonnet-4-6",
 
   exampleInputs: {
     architecture:
-      "AWS infrastructure with EC2 application servers, PostgreSQL database, Redis cache, S3 storage, CloudFront CDN and Route53 DNS.",
+      "AWS EC2 application servers behind an Application Load Balancer, PostgreSQL RDS database, Redis cache, and S3 storage.",
 
-    criticality:
-      "Customer-facing SaaS platform with 24/7 availability requirements. Maximum downtime 1 hour. Daily backups retained for 90 days."
+    businessCriticality: "Mission Critical",
+
+    disasterScenarios:
+      "Region outage, database corruption, ransomware attack, accidental deletion",
+
+    complianceRequirements:
+      "SOC2, ISO 27001",
+
+    recoveryRequirements:
+      "Application must be restored within 2 hours with minimal data loss.",
   },
 
   inputs: [
@@ -32,92 +40,148 @@ export default {
       label: "System Architecture",
       type: "textarea",
       placeholder:
-        "Describe your infrastructure, applications, databases, cloud providers, networking, and dependencies...",
-
+        "Describe your infrastructure, databases, applications, cloud providers, storage systems, and dependencies.",
       required: true,
     },
 
     {
-      id: "criticality",
-      label: "Business Criticality and Requirements",
+      id: "businessCriticality",
+      label: "Business Criticality",
+      type: "select",
+      options: [
+        "Low",
+        "Medium",
+        "High",
+        "Mission Critical",
+      ],
+      defaultValue: "High",
+      required: true,
+    },
+
+    {
+      id: "disasterScenarios",
+      label: "Disaster Scenarios",
       type: "textarea",
       placeholder:
-        "Describe uptime requirements, acceptable downtime, compliance needs, business impact, and service priorities...",
+        "e.g. Cloud region outage, ransomware attack, accidental deletion, hardware failure",
+      required: true,
+    },
 
+    {
+      id: "complianceRequirements",
+      label: "Compliance Requirements",
+      type: "text",
+      placeholder:
+        "e.g. SOC2, ISO 27001, HIPAA, GDPR (optional)",
+      required: false,
+    },
+
+    {
+      id: "recoveryRequirements",
+      label: "Recovery Requirements",
+      type: "textarea",
+      placeholder:
+        "e.g. Restore customer-facing services within 4 hours and databases within 1 hour",
       required: true,
     },
   ],
 
-  systemPrompt: `You are a senior Disaster Recovery (DR) and Business Continuity Planning consultant.
+  systemPrompt: `You are a senior Disaster Recovery (DR) and Business Continuity consultant.
 
-Your task is to generate a complete disaster recovery plan based on the provided system architecture and business requirements.
+Your task is to generate a complete enterprise-grade Disaster Recovery Plan based on the provided architecture, criticality, disaster scenarios, compliance requirements, and recovery requirements.
 
-Always return the response in the following format:
+Return the response in clean markdown.
+
+Structure the response exactly as follows:
 
 # Executive Summary
 
-Provide a high-level overview of the recovery strategy.
+Provide a high-level overview of the disaster recovery strategy.
 
 # System Overview
 
-Summarize the architecture and critical components.
+Summarize the architecture and critical services.
 
-# Business Impact Analysis
+# Risk Assessment
 
-Explain the business impact of downtime for each critical system.
+Create a table with:
 
-# Critical Services
+| Risk | Likelihood | Impact | Mitigation |
 
-List the most important services and dependencies.
+Include all major risks.
 
-# Recovery Time Objective (RTO)
+# Recovery Objectives
 
-Define realistic RTO targets and explain them.
+Define:
 
-# Recovery Point Objective (RPO)
+- Recovery Time Objective (RTO)
+- Recovery Point Objective (RPO)
 
-Define realistic RPO targets and explain them.
+Explain the reasoning behind both.
 
 # Backup Strategy
 
 Include:
+
 - Backup frequency
-- Backup retention
-- Backup storage locations
-- Encryption and security considerations
-
-# Disaster Recovery Procedures
-
-Provide detailed recovery steps.
+- Retention policy
+- Backup locations
+- Encryption recommendations
+- Validation procedures
 
 # Failover Strategy
 
-Explain:
-- Primary environment
-- Secondary environment
-- Failover process
-- Recovery sequence
+Describe:
+
+- Automatic failover
+- Manual failover
+- Multi-region recovery
+- Service restoration order
+
+# Disaster Recovery Procedures
+
+Provide detailed step-by-step recovery instructions for each disaster scenario.
+
+# Roles and Responsibilities
+
+Create a table:
+
+| Role | Responsibility |
+
+Include executives, operations teams, engineers, security teams, and communication owners.
 
 # Communication Plan
 
-Include:
-- Incident escalation process
+Describe:
+
 - Internal communication
 - Customer communication
+- Escalation procedures
 - Stakeholder notifications
 
-# Testing Schedule
+# Testing and Validation Schedule
 
-Include:
-- Monthly validation
-- Quarterly recovery testing
-- Annual disaster simulation
+Provide:
 
-# Risks and Recommendations
+- Monthly checks
+- Quarterly exercises
+- Annual DR simulation
 
-Provide practical recommendations for improving resilience.
+# Compliance and Audit Readiness
 
-Make the plan detailed, realistic, professional, and suitable for audit preparation.`,
+List controls, evidence, and documentation needed for audits.
+
+# Recommendations
+
+Provide actionable recommendations to improve resilience.
+
+Rules:
+- Be realistic and practical.
+- Use industry best practices.
+- Include measurable targets.
+- Tailor recommendations to the provided architecture.
+- Do not use generic placeholders.
+- Think like an enterprise disaster recovery consultant.`,
 
   outputType: "markdown",
 };
