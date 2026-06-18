@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bot, Users, Code2, ArrowRight, Github, Search, X, SlidersHorizontal, Star, Heart, Swords, GitBranch, ChevronDown } from 'lucide-react'
 import { loadAllAgents } from '../agents/registry'
+import AgentCardSkeleton from '../components/AgentCardSkeleton'
 import AgentCard from '../components/AgentCard'
 import { useFavorites } from '../lib/useFavorites'
 import { useHistory } from '../lib/useHistory'
@@ -30,9 +31,10 @@ export default function HomePage() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [agents, setAgents] = useState([])
+  const [agentsLoading, setAgentsLoading] = useState(true)
 
 useEffect(() => {
-  loadAllAgents().then(setAgents)
+  loadAllAgents().then(setAgents).finally(() => setAgentsLoading(false))
 }, [])
   const [selectedCategory, setSelectedCategory] = useState(null)
   const allCategories = useMemo(() => {
@@ -467,7 +469,13 @@ useEffect(() => {
             </span>
           </div>
 
-          {filteredAgents.length > 0 ? (
+          {agentsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+              {Array.from({ length: 9 }).map((_, idx) => (
+                <AgentCardSkeleton key={idx} />
+              ))}
+            </div>
+          ) : filteredAgents.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3">
               {filteredAgents.map((agent, idx) => (
                 <div
