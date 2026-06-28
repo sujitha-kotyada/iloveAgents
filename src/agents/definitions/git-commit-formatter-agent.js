@@ -4,7 +4,7 @@ export default {
   name: "Git Commit & Conventional Commits Formatter",
   description:
     "Parse messy, unstructured developer notes or raw git diffs and generate clean, standardized git commit messages conforming to the Conventional Commits specification.",
-  category: "Developer Tools",
+  category: "Productivity",
   icon: "GitBranch",
   provider: "any",
   defaultProvider: "openai",
