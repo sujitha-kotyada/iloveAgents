@@ -21,13 +21,15 @@ export default function BattleModeLanding() {
   useDocumentTitle('Battle Mode')
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white battle-page-transition">
+    <div className="min-h-screen battle-page-transition
+  dark:bg-surface bg-gray-50
+  dark:text-text-primary text-gray-900">
       <main className="pt-24 flex flex-col items-center justify-center min-h-screen px-4 pb-12">
         {/* Back button */}
         <button
           onClick={() => navigate('/')}
           className="absolute top-20 left-4 sm:left-6 flex items-center gap-1.5 text-xs font-medium
-            text-gray-400 hover:text-white transition-all duration-200 hover:gap-2"
+            dark:text-text-muted text-gray-500 hover:text-white transition-all duration-200 hover:gap-2"
         >
           <ArrowLeft size={14} />
           Back to Agents
@@ -46,7 +48,7 @@ export default function BattleModeLanding() {
             drop-shadow-[0_0_30px_rgba(250,204,21,0.3)]">
             Battle Mode
           </h1>
-          <p className="text-sm text-gray-300 max-w-md mx-auto leading-relaxed font-medium">
+          <p className="text-sm dark:text-text-secondary text-gray-600 max-w-md mx-auto leading-relaxed font-medium">
             Pit three AI providers against each other. Same prompt, three outputs, you decide who wins.
           </p>
         </div>
@@ -61,7 +63,7 @@ export default function BattleModeLanding() {
           >
             <Bot size={28} className={providers[0].color} />
             <span className={`text-sm font-bold ${providers[0].color}`}>{providers[0].name}</span>
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest">{providers[0].label}</span>
+            <span className="text-[10px] dark:text-text-muted dark:text-text-muted text-gray-500 uppercase tracking-widest">{providers[0].label}</span>
           </div>
 
           {/* VS */}
@@ -81,7 +83,7 @@ export default function BattleModeLanding() {
           >
             <Bot size={28} className={providers[1].color} />
             <span className={`text-sm font-bold ${providers[1].color}`}>{providers[1].name}</span>
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest">{providers[1].label}</span>
+            <span className="text-[10px] dark:text-text-muted dark:text-text-muted text-gray-500 uppercase tracking-widest">{providers[1].label}</span>
           </div>
 
           {/* VS */}
@@ -101,7 +103,7 @@ export default function BattleModeLanding() {
           >
             <Bot size={28} className={providers[2].color} />
             <span className={`text-sm font-bold ${providers[2].color}`}>{providers[2].name}</span>
-            <span className="text-[10px] text-gray-500 uppercase tracking-widest">{providers[2].label}</span>
+            <span className="text-[10px] dark:text-text-muted dark:text-text-muted text-gray-500 uppercase tracking-widest">{providers[2].label}</span>
           </div>
         </div>
 
@@ -112,9 +114,9 @@ export default function BattleModeLanding() {
             return (
               <div
                 key={idx}
-                className="flex items-center gap-4 p-5 rounded-xl border border-gray-800/60
+                className="flex items-center gap-4 p-5 rounded-xl border dark:border-border border-gray-200/60
                   bg-gray-900/40 backdrop-blur-sm battle-step-in
-                  hover:border-gray-700/80 hover:bg-gray-900/60 hover:shadow-lg hover:shadow-gray-900/40
+                  hover:border-gray-700/80 hover:dark:bg-surface-input bg-gray-50 hover:shadow-lg hover:shadow-gray-900/40
                   transition-all duration-200 hover:translate-x-1 cursor-default"
                 style={{ animationDelay: `${(idx + 1) * 100}ms` }}
               >
@@ -123,12 +125,12 @@ export default function BattleModeLanding() {
                   <span className="text-lg font-bold text-yellow-400/80">{step.number}</span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                  <span className="text-[10px] font-bold uppercase tracking-widest dark:text-text-muted dark:text-text-muted dark:text-text-muted text-gray-500">
                     Step {idx + 1}
                   </span>
-                  <p className="text-sm font-medium text-gray-100 mt-0.5">{step.text}</p>
+                  <p className="text-sm font-medium dark:text-text-primary dark:text-text-muted dark:text-text-muted text-gray-500 mt-0.5">{step.text}</p>
                 </div>
-                <Icon size={18} className="text-gray-500 flex-shrink-0" />
+                <Icon size={18} className="dark:text-text-muted dark:text-text-muted dark:text-text-muted text-gray-500 flex-shrink-0" />
               </div>
             )
           })}
