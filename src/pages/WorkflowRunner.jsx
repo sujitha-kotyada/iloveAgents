@@ -499,6 +499,38 @@ export default function WorkflowRunner() {
                   </div>
                 )}
 
+                {step.kind === 'conditional' && step.branches && (
+                  <div className="p-4 border-t dark:border-border border-gray-100">
+                    <p className="text-xs font-semibold dark:text-text-secondary text-gray-700 mb-3">
+                      Branch Paths (Labeled Edges):
+                    </p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {Object.entries(step.branches).map(([label, agents]) => (
+                        <div
+                          key={label}
+                          className={`p-3 rounded-md text-xs transition-colors flex items-start gap-2 ${
+                            label === step.branchLabel && step.status === 'done'
+                              ? 'bg-accent/15 border border-accent/40 text-accent'
+                              : 'bg-gray-50 dark:bg-surface-secondary border border-gray-200 dark:border-border text-gray-700 dark:text-text-secondary'
+                          }`}
+                        >
+                          <div className="flex-shrink-0 mt-0.5">
+                            <div className="w-2 h-2 rounded-full bg-current" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium">{label === 'default' ? 'Default' : label}</div>
+                            <div className="text-[10px] opacity-75 mt-1">
+                              {Array.isArray(agents) && agents.length > 0
+                                ? agents.join(' → ')
+                                : 'No agents'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {step.status === 'done' && step.output && (
                   <div className="p-4">
                     <OutputRenderer

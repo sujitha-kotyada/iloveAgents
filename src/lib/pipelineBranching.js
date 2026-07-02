@@ -97,7 +97,7 @@ export function evaluateConditionalStep(step, context) {
  * @param {object} step
  * @returns {string[]}
  */
-export function validateConditionalStep(step) {
+export function validateConditionalStep(step, allSteps = []) {
   const problems = []
   if (!step.id) problems.push('Conditional step is missing an "id".')
   if (!step.condition) problems.push('Conditional step is missing a "condition" template.')
@@ -111,6 +111,8 @@ export function validateConditionalStep(step) {
       problems.push(`Branch "${label}" has no agent steps.`)
     }
   }
+  const circularProblems = detectCircularBranches(step, allSteps)
+  problems.push(...circularProblems)
   return problems
 }
 
@@ -120,4 +122,71 @@ function getPath(obj, path) {
     .split('.')
     .filter(Boolean)
     .reduce((acc, key) => (acc == null ? undefined : acc[key]), obj)
+}
+
+/**
+ * Detect circular references in conditional branch definitions.
+ *
+ * A circular reference occurs when:
+ * 1. A branch directly executes a conditional step it depends on
+ * 2. A branch executes a chain of steps that loops back
+ *
+ * @param {object} step    conditional_branch step object
+ * @param {object[]} allSteps all workflow steps for cycle detection
+ * @returns {string[]} list of circular reference problems detected
+ */
+export function detectCircularBranches(step, allSteps = []) {
+  const problems = []
+  if (!step.branches || typeof step.branches !== 'object') return problems
+
+  const visited = new Set()
+  const recursionStack = new Set()
+
+  function hasCycle(stepId, target) {
+    if (stepId === target) return true
+    if (visited.has(stepId)) return false
+    if (recursionStack.has(stepId)) return true
+
+    recursionStack.add(stepId)
+
+    const currentStep = allSteps.find((s) => s.id === stepId || (typeof s === 'string' && s === stepId))
+    if (currentStep && isConditionalStep(currentStep)) {
+      const branches = currentStep.branches || {}
+      for (const agents of Object.values(branches)) {
+        if (Array.isArray(agents)) {
+          for (const agentId of agents) {
+            if (hasCycle(agentId, target)) {
+              recursionStack.delete(stepId)
+              return true
+            }
+          }
+        }
+      }
+    }
+
+    recursionStack.delete(stepId)
+    visited.add(stepId)
+    return false
+  }
+
+  for (const branchLabel of Object.keys(step.branches)) {
+    const agents = step.branches[branchLabel]
+    if (Array.isArray(agents)) {
+      for (const agentId of agents) {
+        if (agentId === step.id) {
+          problems.push(`Branch "${branchLabel}" directly references the conditional step itself, creating a cycle.`)
+        } else {
+          visited.clear()
+          recursionStack.clear()
+          if (hasCycle(agentId, step.id)) {
+            problems.push(
+              `Branch "${branchLabel}" references a step that eventually loops back to this conditional step.`
+            )
+          }
+        }
+      }
+    }
+  }
+
+  return problems
 }
