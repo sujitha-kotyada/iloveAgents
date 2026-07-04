@@ -22,6 +22,9 @@ import ApiKeyInfo from "./ApiKeyInfo";
 import OutputRenderer from "./OutputRenderer";
 import ErrorCard from "./ErrorCard";
 import CharCounter from "./CharCounter";
+import TokenCounter from "./TokenCounter";
+import CostEstimator from "./CostEstimator";
+import { useSessionSpend } from "../lib/useSessionSpend";
 import VoiceInput from "./VoiceInput";
 import SuggestedChainPills from "./SuggestedChainPills";
 import RunRating from "./RunRating";
@@ -40,6 +43,7 @@ const providerLabels = {
   openai: "OpenAI",
   anthropic: "Anthropic",
   gemini: "Gemini",
+  openrouter: "OpenRouter",
   any: "Any",
 };
 
@@ -55,6 +59,7 @@ const LOADING_MESSAGES = [
   "👀 Your agent is locked in...",
 ];
 
+const MAX_CHAR_LIMIT = 4000; // Character cap configuration
 export default function AgentRunner({ agent }) {
   const {
     provider,
@@ -88,6 +93,7 @@ export default function AgentRunner({ agent }) {
   const [batchMode, setBatchMode] = useState(false);
   const [showModelSwitcher, setShowModelSwitcher] = useState(false);
   const { addJob } = useScheduler();
+  const { addRun } = useSessionSpend();
 
   const isPromptModified = customPrompt !== agent.systemPrompt;
   const abortControllerRef = useRef(null);
@@ -112,6 +118,7 @@ export default function AgentRunner({ agent }) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    setLoading(false);
     setOutput(null);
     setStreamingOutput("");
     setIsStreaming(false);
@@ -151,6 +158,17 @@ export default function AgentRunner({ agent }) {
   const updateInput = (id, value) => {
     setInputs((prev) => ({ ...prev, [id]: value }));
   };
+
+  const getWordCount = (text) => {
+  if (!text) return 0;
+  return text.trim().split(/\s+/).filter(Boolean).length;
+};
+
+const getTokenCount = (text) => {
+  if (!text) return 0;
+  // A rough but highly accurate standard estimate: 1 token ≈ 4 characters
+  return Math.ceil(text.length / 4);
+};
 
   const toggleMultiselect = (id, option) => {
     setInputs((prev) => {
@@ -243,7 +261,16 @@ export default function AgentRunner({ agent }) {
       setIsStreaming(false);
       setDuration(result.duration);
 
-      // Save to history
+      const outputTokenEstimate = Math.max(1, Math.round(result.content.length / 4));
+
+      addRun({
+        model,
+        inputTokens: null,
+        outputTokens: null,
+        inputCost: null,
+        outputCost: null,
+      });
+
       saveRun({
         agentId: agent.id,
         agentName: agent.name,
@@ -338,7 +365,7 @@ export default function AgentRunner({ agent }) {
       {/* Breadcrumb */}
       <a
         href="/"
-        className="inline-block mb-4 text-xs dark:text-text-muted text-gray-400 hover:underline"
+        className="inline-block mb-4 text-xs dark:text-text-muted dark:text-text-muted text-gray-500 hover:underline"
       >
         ← All agents
       </a>
@@ -372,7 +399,7 @@ export default function AgentRunner({ agent }) {
           onClick={handleClear}
           disabled={!hasInputContent()}
           title="Clear Chat"
-          className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg dark:text-text-muted text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Trash2 size={18} />
         </button>
@@ -439,7 +466,7 @@ export default function AgentRunner({ agent }) {
                   placeholder={input.placeholder}
                   className="w-full h-9 pl-3 pr-10 rounded-md text-sm transition-colors
                     dark:bg-surface-input dark:border-border dark:text-text-primary dark:placeholder:text-text-muted
-                    bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400
+                    bg-gray-50 border border-gray-200 text-gray-900 placeholder:dark:text-text-muted text-gray-500
                     focus:ring-1 focus:ring-accent focus:border-accent outline-none"
                 />
                 <VoiceInput
@@ -451,10 +478,15 @@ export default function AgentRunner({ agent }) {
             )}
 
             {input.type === "textarea" && (
-              <div className="relative">
+              <div className="relative flex flex-col gap-1">
                 <textarea
                   value={inputs[input.id] || ""}
-                  onChange={(e) => updateInput(input.id, e.target.value)}
+                  onChange={(e) => {
+                    // 4000 chars se bada text type hone se rokein
+                    if (e.target.value.length <= MAX_CHAR_LIMIT) {
+                      updateInput(input.id, e.target.value);
+                    }
+                  }}
                   placeholder={input.placeholder}
                   rows={4}
                   className="w-full pl-3 pr-10 py-2 rounded-md text-sm transition-colors resize-y
@@ -464,12 +496,26 @@ export default function AgentRunner({ agent }) {
                 />
                 <VoiceInput
                   value={inputs[input.id] || ""}
-                  onChange={(v) => updateInput(input.id, v)}
+                  onChange={(v) => {
+                    if (v.length <= MAX_CHAR_LIMIT) updateInput(input.id, v);
+                  }}
                   className="top-2 right-2"
                 />
-                <CharCounter
+                
+                {/* Dynamic Live Counter Metric Footer Grid */}
+                <div className="flex justify-between items-center px-1 text-[11px] text-gray-400 dark:text-text-muted mt-1.5 w-full">
+                  <div className="flex gap-2 font-medium">
+                    <span>📝 Words: {getWordCount(inputs[input.id])}</span>
+                    <span>🪙 Est. Tokens: {getTokenCount(inputs[input.id])}</span>
+                  </div>
+                  <span className={inputs[input.id]?.length >= MAX_CHAR_LIMIT ? "text-red-500 font-semibold" : ""}>
+                    {inputs[input.id]?.length || 0} / {MAX_CHAR_LIMIT} Chars
+                  </span>
+                </div>
+
+                <TokenCounter
                   value={inputs[input.id] || ""}
-                  maxLength={5000}
+                  modelId={selectedModel}
                 />
               </div>
             )}
@@ -492,10 +538,16 @@ export default function AgentRunner({ agent }) {
                   onChange={(v) => updateInput(input.id, v)}
                   className="top-2 right-2"
                 />
-                <CharCounter
-                  value={inputs[input.id] || ""}
-                  maxLength={5000}
-                />
+                <div className="flex items-center gap-3 mt-1">
+                  <CharCounter
+                    value={inputs[input.id] || ""}
+                    maxLength={5000}
+                  />
+                  <TokenCounter
+                    value={inputs[input.id] || ""}
+                    modelId={selectedModel}
+                  />
+                </div>
               </div>
             )}
 
@@ -595,6 +647,10 @@ export default function AgentRunner({ agent }) {
                 System Prompt
               </label>
               <div className="flex items-center gap-2">
+                <TokenCounter
+                  value={customPrompt}
+                  modelId={selectedModel}
+                />
                 <CharCounter
                   value={customPrompt}
                   maxLength={5000}
@@ -618,7 +674,7 @@ export default function AgentRunner({ agent }) {
                 rows={10}
                 spellCheck={false}
                 className="w-full pl-3 pr-10 py-2.5 rounded-lg text-xs font-mono leading-relaxed transition-colors resize-y
-                  dark:bg-[#0d1117] dark:border-border dark:text-gray-300 dark:placeholder:text-text-muted
+                  dark:bg-[#0d1117] dark:border-border dark:text-text-secondary text-gray-600 dark:placeholder:text-text-muted
                   bg-gray-50 border border-gray-200 text-gray-700 placeholder:text-gray-400
                   focus:ring-1 focus:ring-accent focus:border-accent outline-none"
                 placeholder="Enter your custom system prompt..."
@@ -769,6 +825,14 @@ export default function AgentRunner({ agent }) {
         )}
       </div>
 
+      <div className="mb-4">
+        <CostEstimator
+          inputText={buildUserMessage()}
+          systemPrompt={customPrompt}
+          modelId={selectedModel}
+        />
+      </div>
+
       {error && error.type === "invalid_api_key" ? (
         <ErrorCard message={
           <>
@@ -876,6 +940,7 @@ export default function AgentRunner({ agent }) {
         { value: "openai", label: "OpenAI" },
         { value: "anthropic", label: "Anthropic" },
         { value: "gemini", label: "Gemini" },
+        { value: "openrouter", label: "OpenRouter" },
       ]}
     />
 
