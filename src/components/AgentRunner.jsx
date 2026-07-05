@@ -83,6 +83,7 @@ export default function AgentRunner({ agent }) {
   const [selectedModel, setSelectedModel] = useState(
     MODEL_MAP[provider] || MODEL_MAP.openai,
   );
+  const [versionHistory, setVersionHistory] = useState([]);
   const [playgroundOpen, setPlaygroundOpen] = useState(false);
   const [customPrompt, setCustomPrompt] = useState(agent.systemPrompt);
   const [msgIndex, setMsgIndex] = useState(0);
@@ -229,7 +230,7 @@ const getTokenCount = (text) => {
     setIsStreaming(true);
   }, []);
 
-  const handleRun = async () => {
+const handleRun = async () => {
     setLoading(true);
     setError(null);
     setOutput(null);
@@ -238,9 +239,22 @@ const getTokenCount = (text) => {
     setDuration(null);
     setMsgIndex(0);
 
+      const newVersion = {
+      versionNumber: versionHistory.length + 1,
+      timestamp: new Date().toLocaleTimeString(),
+      configSnapshot: { ...inputs }
+    };
+    setVersionHistory((prevHistory) => [
+      {
+        versionNumber: prevHistory.length + 1,
+        timestamp: new Date().toLocaleTimeString(),
+        configSnapshot: { ...inputs },
+      },
+      ...prevHistory,
+    ]);
+
     const controller = new AbortController();
     abortControllerRef.current = controller;
-
     try {
       const actualProvider =
         agent.provider === "any" ? provider : agent.provider;
@@ -360,7 +374,7 @@ const getTokenCount = (text) => {
     ["text", "textarea", "code"].includes(i.type)
   );
 
-  return (
+ return (
     <div className="max-w-3xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
       <a
@@ -369,6 +383,30 @@ const getTokenCount = (text) => {
       >
         ← All agents
       </a>
+
+      <div className="mt-2 mb-6 p-4 border rounded-lg bg-gray-50 dark:bg-zinc-900 dark:border-zinc-800 text-gray-900 dark:text-gray-100">
+        <h3 className="text-lg font-semibold mb-2">Version History</h3>
+        {versionHistory.length === 0 ? (
+          <p className="text-gray-500 text-sm dark:text-gray-400">No versions saved yet. Click "Run" to create one.</p>
+        ) : (
+          <ul className="space-y-2">
+            {versionHistory.map((v) => (
+              <li key={v.versionNumber} className="flex justify-between items-center p-2 bg-white dark:bg-zinc-800 rounded shadow-sm text-sm">
+                <div>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">Version {v.versionNumber}</span>
+                  <span className="text-gray-400 dark:text-gray-500 text-xs ml-2">({v.timestamp})</span>
+                </div>
+                <button
+                  onClick={() => setInputs(v.configSnapshot)}
+                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-zinc-700 hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white rounded transition"
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Agent Header */}
       <div className="flex items-start gap-4 mb-5">
